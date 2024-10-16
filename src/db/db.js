@@ -1,25 +1,28 @@
 // configuração com o banco mysql
 
-const mysql = require('mysql'); //importando mysql
+const mysql = require('mysql2/promise'); //importando mysql
+require('dotenv').config();// carrega as variaveis de ambiente
+
 
 //configurando uma conexão com o banco de dados
-const db = mysql.createConnection({
-    host: 'localhost',
-    port: 3306,
-    user: 'root',
-    password: 'root',
-    database: 'pizzariat',
+const db = mysql.createPool({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 }); //preencher de acordo com o seu banco de dados
 
 //testar a conexão com o mysql
-db.connect((err) => {
-    if (err) {
-        console.error('Erro ao conectar ao mysql', err);
-    } else {
-        console.log('Conectado ao mysql');
+(async () => {
+    try {
+        const connection = await db.getConnection();
+        console.log('Conexão com o banco de dados estabelecida com sucesso!');
+        connection.release(); //libera a conexão de volta para o pool
+
+    } catch (err){
+        console.error('Erro ao conectar ao banco de dados:', err);
     }
-});
-
-module.exports = db;
-
+})();
+module.exports = db
 //aqui declaramos que esta construção será um modulo e que iremos exportar para ser usado.

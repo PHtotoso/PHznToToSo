@@ -9,11 +9,17 @@ const path = require('path');
 const routes = require('./routes/routes');
 const db = require('./db/db');
 
+const corsOptions = {
+    origin: ['http://localhost:3333', 'https://meudominios.com'], //lista de origens permitadas
+    methods: 'GET, POST, PUT, DELETE', // METODOS HTTP PERMITIDOS 
+    credentials: true, //permite o envio de cookies
+};
+
 //inicialização do aplicativo
 const app = express();
 //middlewares de segurança e utilidades
 app.use(helmet());//protege a aplicação com headers de segurança
-app.use(cors());//habita o cors
+app.use(cors(corsOptions));//habita o cors
 app.use(morgan(`dev`));
 app.use(express.json());//converte os dados recebidos 
 
@@ -40,3 +46,4 @@ const PORT = process.env.PORT || 3333;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
+
