@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt'); //para enciptação de senhas
 
 //validação com joi 
 const clienteSchema = Joi.object({
-    cpf: Joi.string().length(11).require(),//CPF deve ser uma string de extamente 11 caracteres
+    cpf: Joi.string().length(11).required(),//CPF deve ser uma string de extamente 11 caracteres
     nome: Joi.string().required().max(50),
     //nome deve ser uma string e é obrigatório 
     endereco: Joi.string().required().max(100),
@@ -47,5 +47,54 @@ exports.deletarCliente = async (req, res) => {
     } catch (err) {
         console.error('Erro ao deletar cliente:', err);
         res.status(500).json({ error: 'Erro ao deletar cliente'});
+    }
+};
+
+//adicionar um novo cliente 
+exports.adicionarCliente = async (req, res) => {
+    const {cpf, nome, endereco, bairro, cidade, telefone, senha} = req.body;
+
+    //validação de dados 
+    const {error} = clienteSchema.validate({cpf, nome, endereco, bairro, cidade, telefone, senha});
+    if (error) {
+        return res.status(400).json({error: error.details[0].message});
+    }
+
+    try{
+        //Criptografando a senha
+        const hash = await bcrypt.hash(senha,10);
+
+        const novoCliente = {cpf, nome, endereco, bairro, cidade, telefone, senha: hash};
+        await db.query('INSERT INTO cliente SET?', novoCliente);
+
+        res.json({message: 'Cliente adicionado com sucesso'});
+    } catch (err) {
+        console.error('Erro ao adicionar cliente:', err);
+        res.status(500).json({erro: 'Erro ao adicionar cliente'});
+    }
+}
+
+//atualizar um cliente 
+exports.atualizarCliente = async (req, res) => {
+    const {cpf} = req.params;
+    const{nome, endereco, bairro, cidade, telefone, senha} = req.body;
+
+    //validação de dados
+    const {error} = clienteSchema.validate({ cpf, nome, endereco, bairro, cidade, telefone, senha});
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message});
+    }
+    try {
+        //criptografando a senha
+        const hash = await bcrypt.hash(senha, 10);
+        const clienteAtulizado = {nome, endereco, bairro, cidade, telefone, senha: hash};
+        await db.query('UPDATE cliente SET? WHERE cpf = ?', [clienteAtulizado, cpf]);
+        
+        res.json({message: 'Cliente atulizado com sucesso'});
+    
+    } catch (err ) {
+        console.error('Erro ao atulizar cliente:', err);
+        res.status(500).json( {error: 'Erro ao atualizar cliente cliente'});
+
     }
 };

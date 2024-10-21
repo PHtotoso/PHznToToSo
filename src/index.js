@@ -9,6 +9,8 @@ const path = require('path');
 const routes = require('./routes/routes');
 const db = require('./db/db');
 
+const clienteRoutes = require('./routes/clienteroutes');
+
 const corsOptions = {
     origin: ['http://localhost:3333', 'https://meudominios.com'], //lista de origens permitadas
     methods: 'GET, POST, PUT, DELETE', // METODOS HTTP PERMITIDOS 
@@ -34,6 +36,8 @@ app.get('/', (req,res) => {
 
 //configuração de rotas
 app.use('/', routes);
+
+app.use('/', clienteRoutes); //usa as rotas de clientes sob o caminho /api/clientes
 
 //Middleware de tratamento de erros
 app.use((err, req, res, next)=> {
